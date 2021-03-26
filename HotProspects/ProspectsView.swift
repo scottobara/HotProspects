@@ -16,6 +16,7 @@ struct ProspectsView: View {
     
     @EnvironmentObject var prospects: Prospects
     @State private var isShowingScanner = false
+    @State private var isShowingSortSheet = false
     let filter: FilterType
     
     var title: String {
@@ -51,12 +52,12 @@ struct ProspectsView: View {
                             Text(prospect.emailAddress)
                                 .foregroundColor(.secondary)
                         }
-//                        Spacer()
-//                        if prospect.isContacted {
-//                            Image(systemName: "checkmark.circle")
-//                                .foregroundColor(.green)
-//                                .padding(.trailing, 10.0)
-//                        }
+                        Spacer()
+                        if prospect.isContacted { // && filter == .none 
+                            Image(systemName: "checkmark.circle")
+                                .foregroundColor(.green)
+                                .padding(.trailing, 10.0)
+                        }
                     }
                     .contextMenu {
                         Button(prospect.isContacted ? "Mark Uncontacted" : "Mark Contacted" ) {
@@ -72,16 +73,28 @@ struct ProspectsView: View {
                 }
             }
             .navigationBarTitle(title)
-            .navigationBarItems(trailing: Button(action: {
+            .navigationBarItems(leading: Button(action: {
+                self.isShowingSortSheet = true
+            }) {
+                Image(systemName: "list.bullet")
+                Text("Sort")
+            }, trailing: Button(action: {
                 self.isShowingScanner = true
-//                let prospect = Prospect()
-//                prospect.name = "Paul Hudson"
-//                prospect.emailAddress = "paul@hackingwithswift.com"
-//                self.prospects.people.append(prospect)
             }) {
                 Image(systemName: "qrcode.viewfinder")
                 Text("Scan")
             })
+            .actionSheet(isPresented: $isShowingSortSheet) {
+                ActionSheet(
+                    title: Text("Sort your contacts"),
+                    message: Text("Order by:"),
+                    buttons: [
+                        .default(Text("First Name")),
+                        .default(Text("Last Name")),
+                        .default(Text("Email"))
+                    ]
+                )
+            }
             .sheet(isPresented: $isShowingScanner) {
                 CodeScannerView(codeTypes: [.qr], simulatedData: "Paul Hudson\npaul@hackingwithswift.com", completion: self.handleScan)
             }
